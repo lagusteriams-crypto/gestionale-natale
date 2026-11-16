@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173f35">
+<title>Ordini di Natale – Macelleria</title>
+<style>
+:root{--green:#173f35;--green2:#245b4b;--cream:#f6f5ef;--ink:#202923;--muted:#66736c;--line:#dfe5df;--white:#fff;--orange:#a85a16;--red:#a33b32}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:16px system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:var(--green);color:white;padding:18px max(16px,calc((100vw - 1050px)/2));}
+header h1{font-size:22px;margin:0 0 4px}header p{margin:0;color:#dce9e1;font-size:14px}
+main{max-width:1050px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;overflow:auto;margin:4px 0 16px}
+.tab{border:1px solid var(--line);background:white;border-radius:12px;padding:12px 15px;font-weight:650;white-space:nowrap;color:var(--ink)}
+.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.panel{display:none}.panel.active{display:block}
+.card{background:white;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #172b1b08}
+h2{font-size:19px;margin:0 0 14px}h3{font-size:16px;margin:0 0 10px}
+label{display:block;font-size:13px;font-weight:700;color:#4c5b52;margin:0 0 5px}
+input,select,textarea{width:100%;border:1px solid #cbd5cd;border-radius:10px;padding:12px;font:inherit;background:white;color:var(--ink);min-height:46px}
+textarea{min-height:75px;resize:vertical}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{margin-bottom:12px}.full{grid-column:1/-1}
+button{font:inherit;cursor:pointer}
+.primary,.secondary,.danger,.smallbtn{border:0;border-radius:11px;padding:12px 15px;font-weight:700;min-height:44px}
+.primary{background:var(--green);color:white}.secondary{background:#eaf1ec;color:var(--green)}.danger{background:#fae9e7;color:#8c2f28}.smallbtn{background:#edf1ed;color:#30463a;padding:8px 10px;min-height:36px;font-size:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.productrow{display:grid;grid-template-columns:minmax(0,1fr) 105px 105px 40px;gap:8px;align-items:end;margin:9px 0}
+.productrow .field{margin:0}.remove{height:44px;border:0;background:#fae9e7;color:#8c2f28;border-radius:9px;font-size:20px}
+.muted{color:var(--muted);font-size:13px}.empty{padding:20px;text-align:center;color:var(--muted);border:1px dashed #cbd5cd;border-radius:12px}
+.order{border:1px solid var(--line);border-radius:13px;padding:13px;margin:10px 0;background:#fff}
+.orderhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.orderid{font-weight:800;color:var(--green)}.status{font-size:12px;font-weight:750;border-radius:30px;padding:5px 9px;background:#edf1ed}
+.status.work{background:#fff0dc;color:#87500d}.status.ready{background:#e4f3e8;color:#23633b}.status.done{background:#e9edf3;color:#45546a}
+.order ul{padding-left:19px;margin:9px 0}.order li{margin:3px 0}
+.summaryrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.summaryrow:last-child{border:0}
+.pill{display:inline-block;border-radius:20px;background:#edf1ed;padding:4px 9px;font-size:12px;margin:3px 3px 3px 0}
+.notice{background:#fff6e8;border:1px solid #f1d6ad;padding:12px;border-radius:12px;font-size:13px}
+hr{border:0;border-top:1px solid var(--line);margin:15px 0}
+@media(max-width:600px){main{padding:12px}.grid{grid-template-columns:1fr}.productrow{grid-template-columns:minmax(0,1fr) 85px 85px 36px;gap:5px}.productrow input,.productrow select{padding:9px 7px;font-size:14px}.productrow label{font-size:11px}.card{padding:13px}}
+@media print{header,.tabs,.no-print,.actions,.notice{display:none!important}body{background:white}main{max-width:none;padding:0}.panel{display:none!important}#orders.panel.active,#production.panel.active{display:block!important}.card,.order{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><h1>🎄 Ordini di Natale</h1><p>Gestionale semplice per la preparazione e i ritiri della macelleria</p></header>
+<main>
+<div class="tabs no-print">
+<button class="tab active" data-tab="new">＋ Nuovo ordine</button>
+<button class="tab" data-tab="orders">Ordini</button>
+<button class="tab" data-tab="production">Produzione</button>
+<button class="tab" data-tab="products">Prodotti</button>
+</div>
+
+<section id="new" class="panel active">
+<div class="card">
+<h2 id="formTitle">Inserisci un nuovo ordine</h2>
+<div class="grid">
+<div class="field"><label for="customer">Nome cliente *</label><input id="customer" placeholder="Nome e cognome" autocomplete="name"></div>
+<div class="field"><label for="phone">Telefono (per WhatsApp)</label><input id="phone" type="tel" placeholder="Numero di telefono"></div>
+<div class="field"><label for="pickupDate">Data ritiro *</label><input id="pickupDate" type="date"></div>
+<div class="field"><label for="pickupTime">Ora ritiro</label><input id="pickupTime" type="time"></div>
+<div class="field full"><label for="notes">Note (facoltative)</label><textarea id="notes" placeholder="Es. taglio particolare, preparazione, indicazioni..."></textarea></div>
+</div>
+<hr><h3>Prodotti ordinati</h3>
+<div id="lines"></div>
+<div class="actions no-print"><button class="secondary" id="addLine">＋ Aggiungi prodotto</button></div>
+<div class="actions no-print"><button class="primary" id="saveOrder">Salva ordine</button><button class="secondary" id="clearForm">Svuota</button></div>
+<p class="muted">* Campi obbligatori. Per ogni prodotto puoi scegliere kg o pezzi.</p>
+</div>
+</section>
+
+<section id="orders" class="panel">
+<div class="card">
+<h2>Ordini per data di ritiro</h2>
+<div class="grid no-print">
+<div class="field"><label for="filterDate">Filtra per giorno</label><input id="filterDate" type="date"></div>
+<div class="field"><label for="filterStatus">Stato</label><select id="filterStatus"><option value="all">Tutti gli stati</option><option value="Da preparare">Da preparare</option><option value="In lavorazione">In lavorazione</option><option value="Pronto">Pronto</option><option value="Consegnato">Consegnato</option></select></div>
+</div>
+<div id="orderList"></div>
+</div>
+</section>
+
+<section id="production" class="panel">
+<div class="card">
+<h2>Riepilogo produzione</h2>
+<div class="field no-print"><label for="productionDate">Giorno di ritiro</label><input id="productionDate" type="date"></div>
+<div id="productionSummary"></div>
+<div class="actions no-print"><button class="secondary" onclick="window.print()">Stampa lista di produzione</button></div>
+</div>
+</section>
+
+<section id="products" class="panel">
+<div class="card">
+<h2>Catalogo prodotti</h2>
+<p class="muted">Puoi aggiungere altri prodotti in qualsiasi momento. I prodotti già presenti negli ordini non vengono cancellati dagli ordini salvati.</p>
+<div id="productList"></div>
+<hr>
+<h3>Aggiungi un prodotto</h3>
+<div class="grid">
+<div class="field"><label for="newProduct">Nome prodotto</label><input id="newProduct" placeholder="Es. Polpettone"></div>
+<div class="field"><label for="newCategory">Categoria</label><select id="newCategory"><option>Abbacchio e agnello</option><option>Carne bovina e vitello</option><option>Carne suina</option><option>Pollo</option><option>Altri prodotti</option></select></div>
+</div>
+<button class="primary no-print" id="addProduct">Aggiungi al catalogo</button>
+</div>
+</section>
+
+<div class="notice no-print">I dati di questa prima versione vengono salvati nel browser del dispositivo. Usa sempre lo stesso tablet e browser. Questa è una prima versione di prova: prima dell’uso quotidiano in negozio va aggiunta e verificata una procedura di backup esterno, così da proteggere gli ordini.</div>
+</main>
+<script>
+const initialProducts = [
+["Abbacchio a quarti","Abbacchio e agnello"],["Abbacchio intero o metà","Abbacchio e agnello"],["Cotolette abbacchio","Abbacchio e agnello"],
+["Macinato","Carne bovina e vitello"],["Fettine","Carne bovina e vitello"],["Spezzatino","Carne bovina e vitello"],["Arrosto scottona","Carne bovina e vitello"],["Arrosto vitello","Carne bovina e vitello"],["Filetto","Carne bovina e vitello"],["Bistecca costa","Carne bovina e vitello"],
+["Salsicce","Carne suina"],["Costine maiale","Carne suina"],["Pancetta maiale","Carne suina"],
+["Fettine panate","Pollo"],["Petto di pollo panato","Pollo"],["Cosce di pollo","Pollo"],["Petto di pollo","Pollo"],["Ali pollo","Pollo"],["Francesi","Pollo"],
+["Coniglio","Altri prodotti"],["Arrosticini","Altri prodotti"]
+];
+const read = (key, fallback) => {try {const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch(e){return fallback}};
+let products = read("macNatale_products", initialProducts.map((p,i)=>({id:i+1,name:p[0],category:p[1],active:true})));
+let orders = read("macNatale_orders", []);
+let editingId = null;
+let nextOrder = read("macNatale_next", 1);
+const $ = id => document.getElementById(id);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const saveData = () => {localStorage.setItem("macNatale_products",JSON.stringify(products));localStorage.setItem("macNatale_orders",JSON.stringify(orders));localStorage.setItem("macNatale_next",JSON.stringify(nextOrder));};
+const activeProducts = () => products.filter(p=>p.active);
+function switchTab(id){document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.id===id));document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===id));if(id==="orders")renderOrders();if(id==="production")renderProduction();if(id==="products")renderProducts();}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+function addLine(product="",qty="",unit="kg"){
+ const wrap=document.createElement("div");wrap.className="productrow";
+ const options=activeProducts().map(p=>`<option value="${esc(p.name)}" ${p.name===product?"selected":""}>${esc(p.name)}</option>`).join("");
+ wrap.innerHTML=`<div class="field"><label>Prodotto</label><select class="lineProduct">${options}</select></div><div class="field"><label>Quantità</label><input class="lineQty" type="number" min="0" step="0.01" value="${esc(qty)}" placeholder="0"></div><div class="field"><label>Unità</label><select class="lineUnit"><option value="kg" ${unit==="kg"?"selected":""}>kg</option><option value="pezzi" ${unit==="pezzi"?"selected":""}>pezzi</option></select></div><button class="remove no-print" type="button" aria-label="Rimuovi prodotto">×</button>`;
+ wrap.querySelector(".remove").onclick=()=>wrap.remove();$("lines").appendChild(wrap);
+}
+function resetForm(){editingId=null;$("formTitle").textContent="Inserisci un nuovo ordine";$("customer").value="";$("phone").value="";$("pickupDate").value="";$("pickupTime").value="";$("notes").value="";$("lines").innerHTML="";addLine();$("saveOrder").textContent="Salva ordine";}
+$("addLine").onclick=()=>addLine();$("clearForm").onclick=resetForm;
+$("saveOrder").onclick=()=>{
+ const customer=$("customer").value.trim(),date=$("pickupDate").value;
+ if(!customer||!date){alert("Inserisci almeno il nome del cliente e la data di ritiro.");return;}
+ const items=[...document.querySelectorAll(".productrow")].map(r=>({product:r.querySelector(".lineProduct").value,qty:Number(r.querySelector(".lineQty").value),unit:r.querySelector(".lineUnit").value})).filter(x=>x.product&&x.qty>0);
+ if(!items.length){alert("Aggiungi almeno un prodotto con una quantità maggiore di zero.");return;}
+ if(editingId){const old=orders.find(o=>o.id===editingId);Object.assign(old,{customer,phone:$("phone").value.trim(),date,time:$("pickupTime").value,notes:$("notes").value.trim(),items});}
+ else {orders.push({id:nextOrder++,customer,phone:$("phone").value.trim(),date,time:$("pickupTime").value,notes:$("notes").value.trim(),items,status:"Da preparare",created:new Date().toISOString()});}
+ saveData();resetForm();alert("Ordine salvato.");switchTab("orders");
+};
+function dateLabel(d){if(!d)return "";return new Date(d+"T12:00:00").toLocaleDateString("it-IT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});}
+function orderText(o){return `ORDINE N. ${String(o.id).padStart(3,"0")}\\nCliente: ${o.customer}\\nRitiro: ${dateLabel(o.date)}${o.time?" alle "+o.time:""}\\n\\n${o.items.map(i=>`• ${i.product}: ${i.qty} ${i.unit}`).join("\\n")}${o.notes?"\\n\\nNote: "+o.notes:""}`;}
+function renderOrders(){
+ const date=$("filterDate").value,status=$("filterStatus").value;
+ const filtered=orders.filter(o=>(!date||o.date===date)&&(status==="all"||o.status===status)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)||a.id-b.id);
+ $("orderList").innerHTML=filtered.length?filtered.map(o=>`<div class="order"><div class="orderhead"><div><div class="orderid">Ordine n. ${String(o.id).padStart(3,"0")}</div><strong>${esc(o.customer)}</strong><div class="muted">${dateLabel(o.date)}${o.time?" · "+esc(o.time):""}${o.phone?" · "+esc(o.phone):""}</div></div><span class="status ${o.status==="Pronto"?"ready":o.status==="Consegnato"?"done":o.status==="In lavorazione"?"work":""}">${esc(o.status)}</span></div><ul>${o.items.map(i=>`<li>${esc(i.product)} — ${esc(i.qty)} ${esc(i.unit)}</li>`).join("")}</ul>${o.notes?`<p class="muted">Note: ${esc(o.notes)}</p>`:""}<div class="actions no-print"><select aria-label="Stato ordine" onchange="changeStatus(${o.id},this.value)"><option ${o.status==="Da preparare"?"selected":""}>Da preparare</option><option ${o.status==="In lavorazione"?"selected":""}>In lavorazione</option><option ${o.status==="Pronto"?"selected":""}>Pronto</option><option ${o.status==="Consegnato"?"selected":""}>Consegnato</option></select><button class="smallbtn" onclick="editOrder(${o.id})">Modifica</button><button class="smallbtn" onclick="printOne(${o.id})">Stampa</button><button class="smallbtn" onclick="whatsapp(${o.id})">WhatsApp</button><button class="danger" onclick="deleteOrder(${o.id})">Elimina</button></div></div>`).join(""):'<div class="empty">Nessun ordine per questi filtri.</div>';
+}
+$("filterDate").onchange=renderOrders;$("filterStatus").onchange=renderOrders;
+function changeStatus(id,s){const o=orders.find(x=>x.id===id);if(o){o.status=s;saveData();renderOrders();}}
+function editOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;editingId=id;$("formTitle").textContent="Modifica ordine n. "+String(id).padStart(3,"0");$("customer").value=o.customer;$("phone").value=o.phone||"";$("pickupDate").value=o.date;$("pickupTime").value=o.time||"";$("notes").value=o.notes||"";$("lines").innerHTML="";o.items.forEach(i=>addLine(i.product,i.qty,i.unit));$("saveOrder").textContent="Salva modifiche";switchTab("new");}
+function deleteOrder(id){if(confirm("Vuoi eliminare questo ordine?")){orders=orders.filter(o=>o.id!==id);saveData();renderOrders();}}
+function printOne(id){const o=orders.find(x=>x.id===id);if(!o)return;const w=window.open("","_blank");if(!w){alert("Consenti l'apertura della finestra di stampa nel browser.");return;}w.document.write(`<html><head><title>Ordine ${o.id}</title><style>body{font:16px Arial;padding:25px}h1{font-size:22px}li{margin:8px 0}</style></head><body><h1>Ordine n. ${String(o.id).padStart(3,"0")}</h1><h2>${esc(o.customer)}</h2><p>Ritiro: ${dateLabel(o.date)} ${esc(o.time||"")}</p><ul>${o.items.map(i=>`<li>${esc(i.product)} — ${esc(i.qty)} ${esc(i.unit)}</li>`).join("")}</ul><p>${esc(o.notes||"")}</p><script>window.onload=()=>window.print()<\\/script></body></html>`);w.document.close();}
+function whatsapp(id){const o=orders.find(x=>x.id===id);if(!o)return;let phone=(o.phone||"").replace(/\\D/g,"");if(phone.startsWith("00"))phone=phone.slice(2);const message="🎄 ORDINE DI NATALE\n\n📦 Prodotti ordinati:\n"+o.items.map(i=>`• ${i.product}: ${i.qty} ${i.unit}`).join("\n")+"\n\n📅 Data ritiro: "+dateLabel(o.date)+(o.time?"\n🕒 Ora: "+o.time:"")+"\n\nGrazie per aver scelto la nostra macelleria! ❤️";const url="https://wa.me/"+phone+"?text="+encodeURIComponent(message);window.open(url,"_blank");}
+function renderProduction(){
+ const date=$("productionDate").value;const dayOrders=orders.filter(o=>o.date===date).sort((a,b)=>(a.time||"").localeCompare(b.time||"")||a.id-b.id);
+ const totals={};dayOrders.forEach(o=>o.items.forEach(i=>{const k=i.product+"||"+i.unit;totals[k]=(totals[k]||0)+i.qty;}));
+ $("productionSummary").innerHTML=!date?'<div class="empty">Scegli una data per vedere la produzione.</div>':`<h3>${dateLabel(date)}</h3><p class="muted">${dayOrders.length} ordini da gestire</p>${Object.keys(totals).length?Object.entries(totals).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>{const [p,u]=k.split("||");return `<div class="summaryrow"><span>${esc(p)}</span><strong>${Number(v.toFixed(2))} ${u}</strong></div>`}).join(""):'<div class="empty">Nessun prodotto ordinato per questa data.</div>'}<hr><h3>Clienti e ritiri</h3>${dayOrders.map(o=>`<div class="summaryrow"><span><strong>${String(o.id).padStart(3,"0")} · ${esc(o.customer)}</strong><br><span class="muted">${esc(o.time||"Ora non indicata")} · ${esc(o.status)}</span></span><span>${o.items.length} prodotti</span></div>`).join("")}`;
+}
+$("productionDate").onchange=renderProduction;
+function renderProducts(){$("productList").innerHTML=products.map(p=>`<div class="summaryrow"><span>${esc(p.name)} <span class="muted">· ${esc(p.category)}</span> ${p.active?"":'<span class="pill">Disattivato</span>'}</span><button class="smallbtn no-print" onclick="toggleProduct(${p.id})">${p.active?"Disattiva":"Riattiva"}</button></div>`).join("");}
+function toggleProduct(id){const p=products.find(x=>x.id===id);if(p){p.active=!p.active;saveData();renderProducts();}}
+$("addProduct").onclick=()=>{const name=$("newProduct").value.trim();if(!name){alert("Scrivi il nome del prodotto.");return;}if(products.some(p=>p.name.toLowerCase()===name.toLowerCase())){alert("Questo prodotto è già presente.");return;}products.push({id:Math.max(0,...products.map(p=>p.id))+1,name,category:$("newCategory").value,active:true});$("newProduct").value="";saveData();renderProducts();};
+$("pickupDate").value=new Date().toISOString().slice(0,10);$("productionDate").value=$("pickupDate").value;addLine();renderProducts();renderOrders();renderProduction();
+</script>
+</body>
+</html>
